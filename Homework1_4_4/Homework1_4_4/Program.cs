@@ -14,16 +14,16 @@ namespace Homework1_4_4
             Console.CursorVisible = false;
             bool isPlaying = true;
             bool haveKey = false;
-            int playerX;
-            int playerY;
-            int keyX;
-            int keyY;
-            int chestX;
-            int chestY;
-            char[,] map = ReadMap("map1", out playerX, out playerY, out keyX, out keyY, out chestX, out chestY);
+            int playerPositionX;
+            int playerPositionY;
+            int keyPositionX;
+            int keyPositionY;
+            int chestPositionX;
+            int chestPositionY;
+            char[,] map = ReadMap("map1", out playerPositionX, out playerPositionY, out keyPositionX, out keyPositionY, out chestPositionX, out chestPositionY);
 
             DrawMap(map);
-            Work(map, isPlaying, playerY, playerX, haveKey);
+            Work(map, isPlaying, playerPositionY, playerPositionX, haveKey);
 
             Console.Clear();
             Console.WriteLine("Сундук открыт!");
@@ -31,68 +31,77 @@ namespace Homework1_4_4
             Console.ReadKey();
         }
 
-        static void Work(char [,] map,bool isPlaying, int playerY, int playerX, bool haveKey)
+        static void Work(char [,] map,bool isPlaying, int playerPositionY, int playerPositionX, bool haveKey)
         {
-            int playerDX = 0;
-            int playerDY = 0;
             const char WallSymbol = '&';
             const char KeySymbol = 'K';
             const char ChestSymbol = '0';
+            int playerChangePositionX = 0;
+            int playerChangePositionY = 0;
 
             while (isPlaying)
             {
-                Console.SetCursorPosition(playerY, playerX);
+                Console.SetCursorPosition(playerPositionY, playerPositionX);
                 Console.Write("8");
 
                 if (Console.KeyAvailable)
                 {
-                    ConsoleKeyInfo key = Console.ReadKey(true);
+                    Move(ref playerChangePositionX, ref playerChangePositionY);
 
-                    switch (key.Key)
-                    {
-                        case ConsoleKey.UpArrow:
-                            playerDX = -1;
-                            playerDY = 0;
-                            break;
-                        case ConsoleKey.DownArrow:
-                            playerDX = 1;
-                            playerDY = 0;
-                            break;
-                        case ConsoleKey.LeftArrow:
-                            playerDX = 0;
-                            playerDY = -1;
-                            break;
-                        case ConsoleKey.RightArrow:
-                            playerDX = 0;
-                            playerDY = 1;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (map[playerX + playerDX, playerY + playerDY] == KeySymbol)
+                    if (map[playerPositionX + playerChangePositionX, playerPositionY + playerChangePositionY] == KeySymbol)
                     {
                         haveKey = true;
                     }
 
-                    if ((map[playerX + playerDX, playerY + playerDY] != WallSymbol && map[playerX + playerDX, playerY + playerDY] != ChestSymbol) || (map[playerX + playerDX, playerY + playerDY] == ChestSymbol && haveKey == true))
+                    if ((map[playerPositionX + playerChangePositionX, playerPositionY + playerChangePositionY] != WallSymbol && map[playerPositionX + playerChangePositionX, playerPositionY + playerChangePositionY] != ChestSymbol) || (map[playerPositionX + playerChangePositionX, playerPositionY + playerChangePositionY] == ChestSymbol && haveKey == true))
                     {
-                        if (map[playerX + playerDX, playerY + playerDY] == ChestSymbol && haveKey == true)
+                        if (map[playerPositionX + playerChangePositionX, playerPositionY + playerChangePositionY] == ChestSymbol && haveKey == true)
                         {
                             isPlaying = false;
                         }
                         else
                         {
-                            Console.SetCursorPosition(playerY, playerX);
+                            Console.SetCursorPosition(playerPositionY, playerPositionX);
                             Console.Write(' ');
-                            playerX += playerDX;
-                            playerY += playerDY;
+                            playerPositionX += playerChangePositionX;
+                            playerPositionY += playerChangePositionY;
                         }
                     }
 
-                    playerDX = 0;
-                    playerDY = 0;
+                    playerChangePositionX = 0;
+                    playerChangePositionY = 0;
                 }
+            }
+        }
+
+        static void Move(ref int playerChangePositionX, ref int playerChangePositionY)
+        {
+            const ConsoleKey CaseUpArrow = ConsoleKey.UpArrow;
+            const ConsoleKey CaseDownArrow = ConsoleKey.DownArrow;
+            const ConsoleKey CaseLeftArrow = ConsoleKey.LeftArrow;
+            const ConsoleKey CaseRightArrow = ConsoleKey.RightArrow;
+            ConsoleKeyInfo key = Console.ReadKey(true);
+
+            switch (key.Key)
+            {
+                case CaseUpArrow:
+                    playerChangePositionX = -1;
+                    playerChangePositionY = 0;
+                    break;
+                case CaseDownArrow:
+                    playerChangePositionX = 1;
+                    playerChangePositionY = 0;
+                    break;
+                case CaseLeftArrow:
+                    playerChangePositionX = 0;
+                    playerChangePositionY = -1;
+                    break;
+                case CaseRightArrow:
+                    playerChangePositionX = 0;
+                    playerChangePositionY = 1;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -109,17 +118,17 @@ namespace Homework1_4_4
             }
         }
 
-        static char [,] ReadMap(string mapName, out int playerX, out int playerY, out int keyX, out int keyY, out int chestX, out int chestY)
+        static char [,] ReadMap(string mapName, out int playerPositionX, out int playerPositionY, out int keyPositionX, out int keyPositionY, out int chestPositionX, out int chestPositionY)
         {
             const char PlayerSymbol = '8';
             const char KeySymbol = 'K';
             const char ChestSymbol = '0';
-            playerX = 0;
-            playerY = 0;
-            keyX = 0;
-            keyY = 0;
-            chestX = 0;
-            chestY = 0;
+            playerPositionX = 0;
+            playerPositionY = 0;
+            keyPositionX = 0;
+            keyPositionY = 0;
+            chestPositionX = 0;
+            chestPositionY = 0;
             string[] newFile = File.ReadAllLines($"Maps/{mapName}.txt");
             char[,] map = new char[newFile.Length, newFile[0].Length];
 
@@ -133,16 +142,16 @@ namespace Homework1_4_4
                     switch (symbol)
                     {
                         case PlayerSymbol:
-                            playerX = mapRow;
-                            playerY = mapColumn;
+                            playerPositionX = mapRow;
+                            playerPositionY = mapColumn;
                             break;
                         case KeySymbol:
-                            keyX = mapRow;
-                            keyY = mapColumn;
+                            keyPositionX = mapRow;
+                            keyPositionY = mapColumn;
                             break;
                         case ChestSymbol:
-                            chestX = mapRow;
-                            chestY = mapColumn;
+                            chestPositionX = mapRow;
+                            chestPositionY = mapColumn;
                             break;
                         default:
                             break;
